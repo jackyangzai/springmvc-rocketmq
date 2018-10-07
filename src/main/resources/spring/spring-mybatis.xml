@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd"
+       default-lazy-init="true">
+
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreResourceNotFound" value="true"/>
+        <property name="locations">
+            <list>
+                <value>classpath*:config/datasource.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <context:annotation-config/>
+    <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="url" value="${ds.url}"/>
+        <property name="username" value="${ds.username}"/>
+        <property name="password" value="${ds.password}"/>
+        <property name="driverClassName" value="${ds.driverClassName}"/>
+        <property name="initialSize" value="${ds.initialSize}"/>
+        <property name="maxActive" value="${ds.maxActive}"/>
+        <property name="minIdle" value="${ds.minIdle}"/>
+        <property name="maxWait" value="${ds.maxWait}"/>
+        <property name="useUnfairLock" value="${ds.useUnfairLock}"/>
+        <property name="validationQuery" value="${ds.validationQuery}"/>
+        <property name="testOnBorrow" value="${ds.testOnBorrow}"/>
+        <property name="testOnReturn" value="${ds.testOnReturn}"/>
+        <property name="testWhileIdle" value="${ds.testWhileIdle}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="${ds.timeBetweenEvictionRunsMillis}"/>
+        <property name="minEvictableIdleTimeMillis" value="${ds.minEvictableIdleTimeMillis}"/>
+        <property name="filters" value="${ds.filters}"/>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:/mybatis/mybatis-config.xml"/>
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:/mybatis/mappers/**/*.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.wangxin.**.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+
+</beans>
